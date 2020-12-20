@@ -84,6 +84,8 @@ Content-Encoding: UTF-8
 Content-Length: %d
 
 """%size
+    print("-----HTTP respone info.html: ")
+    print
     
 
 def moveToInfo(Client):
