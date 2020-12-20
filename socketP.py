@@ -53,7 +53,7 @@ def showIndex(Server,Client,Request): #show file index
 def checkPass(Request):
     if "POST / HTTP/1.1" not in Request: #tham khao HTTP Protocol de code html
         return False
-    if "username=admin&password=admin&submit=Login" in Request: #khi co username&password dung trong Request
+    if "username=admin&password=admin" in Request: #khi co username&password dung trong Request
         return True
     else:
         return False
@@ -73,6 +73,18 @@ Content-Length: %d
     print(header)
     header += L.decode()
     Client.send(bytes(header,'utf-8'))
+    
+def sendImg(Client,Img)
+    f=open(Img,"rb")
+    L=f.read()
+    size=len(bytes)
+    header= """HTTP/1.1 200 OK
+Content-Type: text/html; charset=UTF-8
+Content-Encoding: UTF-8
+Content-Length: %d
+
+"""%size
+    
 
 def moveToInfo(Client):
     header= """HTTP/1.1 301 Moved Permanently
@@ -92,6 +104,41 @@ def showInfo(Server,Client): #show file info
     if "GET /info.html HTTP/1.1" in Request:
         showInfo(Server, Client)
     Server.close()
+    
+    #Tuong tu nhu o info, ta gui file 404 len request, chuyen den http chua 404, sau do show 404
+
+def send404(Client):
+    f=open("404.html","rb")
+    L=f.read()
+    header= """HTTP/1.1 200 OK
+Content-Type: text/html; charset=UTF-8
+Content-Encoding: UTF-8
+Content-Length: %d
+
+"""%len(L)
+    print("----HTTP respone 404.html: ")
+    print(header)
+    header += L.decode()
+    Client.send(bytes(header,'utf-8'))
+
+def moveTo404(Client):
+    header= """HTTP/1.1 301 Moved Permanently
+Location: http://localhost:8080/404.html
+
+"""
+    print("---HTTP respont move to info.html: ")
+    print(header)
+    Client.send(bytes(header,'utf-8'))
+    Server.close()
+
+def show404(Server,Client): #show file info  
+    Server = createServer("localhost",8080)
+    Client, Request = readHTTPRequest(Server)
+    print("----HTTP request: ")
+    print (Request) #In request truoc khi chuyen ve showInfo (Luc nay da co request tao tu readHTTPRequest)
+    if "GET /404.html HTTP/1.1" in Request:
+        showInfo(Server, Client)
+    Server.close()
 
 
 if __name__=="__main__": 
@@ -108,6 +155,9 @@ if __name__=="__main__":
         if checkPass (Request) == True:
             moveToInfo(Client) #gui request truy cap info cho Server
             showInfo(Server,Client)
-
+        else:  
+            moveTo404(Client)
+            show404(Server, Client)
+            
 
 
