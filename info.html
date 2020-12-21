@@ -96,17 +96,20 @@
         .btn-box button{
             background-color : #31B0D5;
             color: white;
-            padding: 10px;
+            padding: 10px 20px;
             border-radius: 4px;
-            margin: 20px;
+            margin: 10px 10px;
             border-color: #46b8da;
-            position: fixed;
+
         }
-        #logout
-        {
-            display: block;
-            margin-inline: 140px;
+
+        @media screen and (min-width: 900px) {
+            .btn-box{
+                display: flex;
+                overflow: hidden;
+            }
         }
+
     </style>
 </head>
 
@@ -141,6 +144,8 @@
         <button onclick="window.location.href='index.html'", id ="logout">
         Log out
         </button>
+    </div>
+    <div class="btn-box"> 
         <button onclick="window.location.href='files.html'", id="download">
            Download Files
         </button>
