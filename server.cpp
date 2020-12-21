@@ -24,6 +24,7 @@ int createServer(CSocket &server, CSocket &connector)
 	}
 	return 0;
 }
+
 void printRequest(char request[])
 {
 	cout << "-------------HTTP request:" << endl;
@@ -47,7 +48,16 @@ void printRequest(char request[])
 	{
 		cout << "GET /404.html HTTP/1.1" << endl;
 	}
+	if (strstr(request, "GET /lam.jpg HTTP/1.1") != NULL)
+	{
+		cout << "GET /lam.jpg HTTP/1.1" << endl;
+	}
+	if (strstr(request, "GET /han.jpg HTTP/1.1") != NULL)
+	{
+		cout << "GET /han.jpg HTTP/1.1" << endl;
+	}
 }
+
 void printResponse(char response[])
 {
 	cout << "-------------HTTP reponse:" << endl;
@@ -72,6 +82,7 @@ void printResponse(char response[])
 		cout << "HTTP/1.1 301 Moved Permanently\r\nLocation: http://localhost:80/info.html" << endl;
 	}
 }
+
 void sendMoveIndex(CSocket& server, CSocket& connector)
 {
 	char response[] = "HTTP/1.1 301 Moved Permanently\r\nLocation: http://localhost:80/index.html";
@@ -81,6 +92,7 @@ void sendMoveIndex(CSocket& server, CSocket& connector)
 	connector.Close();
 	server.Close();
 }
+
 void sendIndex(CSocket& server, CSocket& connector)
 {
 	ifstream index("index.html", ios::out | ios::binary | ios::ate);
@@ -98,6 +110,7 @@ void sendIndex(CSocket& server, CSocket& connector)
 	connector.Close();
 	server.Close();
 }
+
 void sendMove404(CSocket &server, CSocket &connector)
 {
 	char response[] = "HTTP/1.1 301 Moved Permanently\r\nLocation: http://localhost:80/404.html";
@@ -107,6 +120,7 @@ void sendMove404(CSocket &server, CSocket &connector)
 	connector.Close();
 	server.Close();
 }
+
 void send404(CSocket &server, CSocket &connector)
 {
 	ifstream file404("404.html", ios::out | ios::binary | ios::ate);
@@ -125,6 +139,7 @@ void send404(CSocket &server, CSocket &connector)
 	connector.Close();
 	server.Close();
 }
+
 void sendMoveInfo(CSocket& server, CSocket& connector)
 {
 	char response[] = "HTTP/1.1 301 Moved Permanently\r\nLocation: http://localhost:80/info.html";
@@ -134,8 +149,48 @@ void sendMoveInfo(CSocket& server, CSocket& connector)
 	connector.Close();
 	server.Close();
 }
-void sendInfo(CSocket& server, CSocket& connector)
+
+void sendImg1(CSocket& server, CSocket& connector)
 {
+	ifstream img("lam.jpg" , ios::out | ios::binary | ios::ate);
+	streampos size = img.tellg();
+	char response[10000] = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\nContent-Lenghth: 10000\r\n\r\n";
+	printResponse(response);
+	int length = strlen(response);
+	char* buff = new char[size];
+	img.seekg(0, ios::beg);
+	img.read(buff, byte(size));
+	strcat(response, buff);
+	connector.Send(&response, length + size, 0);
+	img.close();
+	delete[]buff;
+	//cout << msgrcv;
+	connector.Close();
+	server.Close();
+}
+
+void sendImg2(CSocket& server, CSocket& connector)
+{
+	ifstream img("han.jpg", ios::out | ios::binary | ios::ate);
+	streampos size = img.tellg();
+	char response[10000] = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\nContent-Lenghth: 10000\r\n\r\n";
+	printResponse(response);
+	int length = strlen(response);
+	char* buff = new char[size];
+	img.seekg(0, ios::beg);
+	img.read(buff, byte(size));
+	strcat(response, buff);
+	connector.Send(&response, length + size, 0);
+	img.close();
+	delete[]buff;
+	//cout << msgrcv;
+	connector.Close();
+	server.Close();
+}
+
+void sendInfo(CSocket& server, CSocket& Connector)
+{
+	
 	ifstream info("info.html", ios::out | ios::binary | ios::ate);
 	streampos size = info.tellg();
 	char response[10000] = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Lenghth: 10000\r\n\r\n";
@@ -145,14 +200,15 @@ void sendInfo(CSocket& server, CSocket& connector)
 	info.seekg(0, ios::beg);
 	info.read(buff, size);
 	strcat(response, buff);
-	connector.Send(&response, length + size, 0);
+	Connector.Send(&response, length + size, 0);
 	info.close();
 	delete[]buff;
 	//cout << msgrcv;
-	connector.Close();
+	Connector.Close();
 	server.Close();
 }
-int main(int argc, char *argv[])
+
+int main(int argc, char* argv[])
 {
 	int r;
 	//Khoi tao MFC
@@ -181,7 +237,7 @@ int main(int argc, char *argv[])
 		cout << "Waiting for client." << endl;
 		cout << "Please enter 'localhost' or 'localhost/index.html' into browser to connect to the server." << endl << endl;
 		if (server.Accept(Connector))
-		{				
+		{
 			//cout << "Da co Client ket Noi !!!" << endl << endl;
 			char request[10000];
 			Connector.Receive(&request, 10000, 0);
@@ -237,7 +293,7 @@ int main(int argc, char *argv[])
 				//cout << "Da co Client ket Noi !!!" << endl << endl;
 				Connector.Receive(&request, 100000, 0);
 				printRequest(request);
-				if (strstr(request,"POST") != NULL && strstr(request, "username=admin&password=admin") != NULL)
+				if (strstr(request, "POST") != NULL && strstr(request, "username=admin&password=admin") != NULL)
 				{
 					sendMoveInfo(server, Connector);
 					r = createServer(server, Connector);
@@ -255,28 +311,65 @@ int main(int argc, char *argv[])
 						printRequest(request);
 						sendInfo(server, Connector);
 					}
-					else if (strstr(request,"POST") != NULL)
+					r = createServer(server, Connector);
+					if (r == 1)
 					{
-						sendMove404(server, Connector);
-						r = createServer(server, Connector);
-						if (r == 1)
+						return 1;
+					}
+					if (server.Accept(Connector))
+					{
+						if (strstr(request, "GET /lam.jpg HTTP/1.1") == NULL )
 						{
-							return 1;
-						}
-						if (server.Accept(Connector))
-						{
-							//cout << "Da co Client ket Noi !!!" << endl << endl;
-							while (strstr(request, "GET /404.html HTTP/1.1") == NULL)
-							{
-								Connector.Receive(&request, 100000, 0);
-							}
+							Connector.Receive(&request, 100000, 0);
 							printRequest(request);
-							send404(server, Connector);
+							sendImg1(server, Connector);
 						}
+						
+						if (strstr(request, "GET /han HTTP/1.1") == NULL)
+						{
+							Connector.Receive(&request, 100000, 0);
+							printRequest(request);
+							sendImg2(server, Connector);
+						}
+
+						if (strstr(request, "GET /lam.jpg HTTP/1.1") == NULL)
+						{
+							Connector.Receive(&request, 100000, 0);
+							printRequest(request);
+							sendImg1(server, Connector);
+						}
+
+						if (strstr(request, "GET /han HTTP/1.1") == NULL)
+						{
+							Connector.Receive(&request, 100000, 0);
+							printRequest(request);
+							sendImg2(server, Connector);
+						}
+
 					}
 				}
-			}					
-		}				
+				else if (strstr(request, "POST") != NULL && strstr(request, "username=admin&password=admin") == NULL)
+				{
+					sendMove404(server, Connector);
+					r = createServer(server, Connector);
+					if (r == 1)
+					{
+						return 1;
+					}
+					if (server.Accept(Connector))
+					{
+						//cout << "Da co Client ket Noi !!!" << endl << endl;
+						while (strstr(request, "GET /404.html HTTP/1.1") == NULL)
+						{
+							Connector.Receive(&request, 100000, 0);
+						}
+						printRequest(request);
+						send404(server, Connector);
+					}
+				}
+
+			}
+		}
 	}
 	system("pause");
 }
