@@ -171,18 +171,31 @@ void sendImg1(CSocket& server, CSocket& connector)
 
 void sendImg2(CSocket& server, CSocket& connector)
 {
+	//char *str;
 	ifstream img("han.jpg", ios::out | ios::binary | ios::ate);
 	streampos size = img.tellg();
-	char response[10000] = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\nContent-Lenghth: 10000\r\n\r\n";
-	printResponse(response);
+	//char response[10000] = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\nContent-Lenghth: 10000\r\n\r\n";
+	char response [10000] = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Lenghth: 10000\r\n\r\n";
+	//printResponse(response);
 	int length = strlen(response);
-	char* buff = new char[size];
+	//int length = response.length();
+	vector<char>buff;
 	img.seekg(0, ios::beg);
-	img.read(buff, byte(size));
-	strcat(response, buff);
-	connector.Send(&response, length + size, 0);
+	//int i = 0;
+	//while(response[i]!='\0')
+	//{
+	//	buff.insert(buff.begin(), response[i]);
+	//	i++;
+	//}
+	buff.insert(buff.begin() , std::istream_iterator<char>(img), std::istream_iterator<char>());
+	reverse(buff.begin(), buff.end());
+	buff.erase(remove(buff.begin(), buff.end(), '\0'));
+	char* buf = &buff[0];
+	strcat(response, buf);
+	//response.append(buf);
+	connector.Send(&response, length + buff.size(), 0);
+	cout << response;
 	img.close();
-	delete[]buff;
 	//cout << msgrcv;
 	connector.Close();
 	server.Close();
