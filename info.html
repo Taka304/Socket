@@ -93,6 +93,20 @@
                 height: auto;
             }
         }
+        .btn-box button{
+            background-color : #31B0D5;
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 20px;
+            border-color: #46b8da;
+            position: fixed;
+        }
+        #logout
+        {
+            display: block;
+            margin-inline: 140px;
+        }
     </style>
 </head>
 
@@ -123,6 +137,14 @@
                 <p class="details">I am a student of University of Science. Currently living in HCM City</p>
             </div>
         </div>
+    <div class="btn-box"> 
+        <button onclick="window.location.href='index.html'", id ="logout">
+        Log out
+        </button>
+        <button onclick="window.location.href='files.html'", id="download">
+           Download Files
+        </button>
+    </div>
     </div>
 </body>
 </html>

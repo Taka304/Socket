@@ -1,165 +1,237 @@
-
 import socket
 
-def createServer(host, port):
-    Server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #Tao socket server
-    Server.bind((host,port)) #rang buoc host vs port
-    Server.listen(5) #lang nghe (max 5 client)
-    return Server
+def createServer():
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #Tao socket server
+    if server==0 :
+        print("Tao socket that bai\n")
+        return server, 1
+    server.bind(("localhost",80)) 
+    if server.listen(5)==0:
+        print("Khong the lang nghe\n")
+        server.close()
+        return server, 1
+    return server, 0
 
-def readHTTPRequest(Server):
-    msg=""
-    while(msg == ""): #Khi khong co request -> doc request
-        print("Waiting for Client")
-        Client, address = Server.accept() #Chap nhan client
-        print("Client: ", address," connected to Server")
-        msg = Client.recv(1024).decode()
-    return Client,msg
-                    
-def sendIndex(Client): #chuyen file index len request
-    f = open("index.html","rb")
-    L = f.read()
-    header = """HTTP/1.1 200 OK
-    Content-Length: %d
+def printRequest(request):
+    print("-------------HTTP request:\n")
+    if "GET / HTTP/1.1" in request:
+        print("GET / HTTP/1.1")
+    if "GET /index.html HTTP/1.1" in request:
+        print("GET /index.html HTTP/1.1")
+    if "GET /info.html HTTP/1.1" in request:
+        print("GET /info.html HTTP/1.1")
+    if "GET /404.html HTTP/1.1" in request:
+        print("GET /404.html HTTP/1.1")
+    if "GET /lam.jpg HTTP/1.1" in request:
+        print("GET /lam.jpg HTTP/1.1")
+    if "GET /han.jpg HTTP/1.1" in request:
+        print("GET /han.jpg HTTP/1.1")
 
-    """%len(L) #tao request cho index #Nhớ để khoảng trống chứ k nó k phân biệt được đầu đuôi TT
-    print("----HTTP respone index.html: ")
-    print(header)
-    header += L.decode() # binary -> string
-    Client.send(bytes(header,'utf-8'))
+def printRespone(respone):
+    print("-------------HTTP respone:\n")
+    if "HTTP/1.1 301 Moved Permanently\r\nLocation: http://localhost:80/index.html" in respone:
+        print("HTTP/1.1 301 Moved Permanently\r\nLocation: http://localhost:80/index.html")
+    if "HTTP/1.1 200 OK" in respone:
+        print("HTTP/1.1 200 OK")
+    if "HTTP/1.1 301 Moved Permanently\r\nLocation: http://localhost:80/404.html" in respone:
+        print("HTTP/1.1 301 Moved Permanently\r\nLocation: http://localhost:80/404.html")
+    if "HTTP/1.1 404 Not Found" in respone:
+        print("HTTP/1.1 404 Not Found")
+    if "HTTP/1.1 301 Moved Permanently\r\nLocation: http://localhost:80/info.html" in respone:
+        print("HTTP/1.1 301 Moved Permanently\r\nLocation: http://localhost:80/info.html")
 
-def moveToIndex(Client):#chuyen http toi duong dan index
-    header = """HTTP/1.1 301 Moved Permanently
-Location: http://localhost:8080/index.html
+def sendMoveIndex(server,connector):
+    respone= "HTTP/1.1 301 Moved Permanently\r\nLocation: http://localhost:80/index.html"
+    printRespone(respone)
+    size=len(respone)
+    connector.send(bytes(respone,"utf-8"))
+    connector.close()
+    server.close()
 
-"""
-    print("----HTTP respone move to index.html: ")
-    print(header)
-    Client.send(bytes(header,'utf-8'))
+def sendIndex(server,connector):
+    index = open ("index.html", "rb")
+    buffer=index.read()
+    respone="HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Lenghth: %d\r\n\r\n"%len(buffer)
+    printRespone(respone)
+    respone+=buffer.decode()    
+    connector.send(bytes(respone,"utf-8"))
+    index.close()
+    connector.close()
+    server.close()
 
-def showIndex(Server,Client,Request): #show file index 
-    if "GET /index.html HTTP/1.1" in Request: #Truong hop da co san phan index.html trong duong dan
-        sendIndex(Client)
-        Server.close()
-    if "GET / HTTP/1.1" in Request: #Truong hop khong co index.html trong duong dan
-        moveToIndex(Client) #gui request truy cap Index cho Server
-        Server.close()
-        Server = createServer("localhost",8080)
-        Client, Request = readHTTPRequest(Server)
-        print("----HTTP request: ")
-        print (Request) #In request truoc khi chuyen ve showIndex (Luc nay da co request tao tu readHTTPRequest)
-        showIndex(Server, Client, Request)
+def sendMove404(server,connector):
+    respone="HTTP/1.1 301 Moved Permanently\r\nLocation: http://localhost:80/404.html"
+    printRespone(respone)
+    size=len(respone)
+    connector.send(bytes(respone,"utf-8"))
+    connector.close()
+    server.close()
 
-def checkPass(Request):
-    if "POST / HTTP/1.1" not in Request: #tham khao HTTP Protocol de code html
-        return False
-    if "username=admin&password=admin" in Request: #khi co username&password dung trong Request
-        return True
-    else:
-        return False
+def send404(server,connector):
+    index = open ("404.html", "rb")
+    buffer=index.read()
+    respone="HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\nContent-Lenghth: %d\r\n\r\n"%len(buffer)
+    printRespone(respone)
+    respone+=buffer.decode()    
+    connector.send(bytes(respone,"utf-8"))
+    index.close()
+    connector.close()
+    server.close()
 
-#Tuong tu nhu o index, ta gui file info len request, chuyen den http chua info, sau do show Info
+def sendMoveFiles(server,connector):
+    respone="HTTP/1.1 301 Moved Permanently\r\nLocation: http://localhost:80/files.html"
+    printRespone(respone)
+    size=len(respone)
+    connector.send(bytes(respone,"utf-8"))
+    connector.close()
+    server.close()
 
-def sendInfo(Client):
-    f=open("info.html","rb")
-    L=f.read()
-    header= """HTTP/1.1 200 OK
-Content-Type: text/html; charset=UTF-8
-Content-Encoding: UTF-8
-Content-Length: %d
+def sendFiles(server,connector):
+    index = open ("files.html", "rb")
+    buffer=index.read()
+    respone="""HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Lenghth: %d\r\n\r\n"""%len(buffer)
+    printRespone(respone)
+    respone+=buffer.decode()    
+    connector.send(bytes(respone,"utf-8"))
+    index.close()
+    connector.close()
+    server.close()
 
-"""%len(L)
-    print("----HTTP respone info.html: ")
-    print(header)
-    header += L.decode()
-    Client.send(bytes(header,'utf-8'))
-    
-def sendImg(Client,Img)
-    f=open(Img,"rb")
-    L=f.read()
-    size=len(bytes)
-    header= """HTTP/1.1 200 OK
-Content-Type: text/html; charset=UTF-8
-Content-Encoding: UTF-8
-Content-Length: %d
-
-"""%size
-    print("-----HTTP respone info.html: ")
-    print
-    
-
-def moveToInfo(Client):
-    header= """HTTP/1.1 301 Moved Permanently
-Location: http://localhost:8080/info.html
-
-"""
-    print("---HTTP respont move to info.html: ")
-    print(header)
-    Client.send(bytes(header,'utf-8'))
-    Server.close()
-
-def showInfo(Server,Client): #show file info  
-    Server = createServer("localhost",8080)
-    Client, Request = readHTTPRequest(Server)
-    print("----HTTP request: ")
-    print (Request) #In request truoc khi chuyen ve showInfo (Luc nay da co request tao tu readHTTPRequest)
-    if "GET /info.html HTTP/1.1" in Request:
-        showInfo(Server, Client)
-    Server.close()
-    
-    #Tuong tu nhu o info, ta gui file 404 len request, chuyen den http chua 404, sau do show 404
-
-def send404(Client):
-    f=open("404.html","rb")
-    L=f.read()
-    header= """HTTP/1.1 200 OK
-Content-Type: text/html; charset=UTF-8
-Content-Encoding: UTF-8
-Content-Length: %d
-
-"""%len(L)
-    print("----HTTP respone 404.html: ")
-    print(header)
-    header += L.decode()
-    Client.send(bytes(header,'utf-8'))
-
-def moveTo404(Client):
-    header= """HTTP/1.1 301 Moved Permanently
-Location: http://localhost:8080/404.html
-
-"""
-    print("---HTTP respont move to info.html: ")
-    print(header)
-    Client.send(bytes(header,'utf-8'))
-    Server.close()
-
-def show404(Server,Client): #show file info  
-    Server = createServer("localhost",8080)
-    Client, Request = readHTTPRequest(Server)
-    print("----HTTP request: ")
-    print (Request) #In request truoc khi chuyen ve showInfo (Luc nay da co request tao tu readHTTPRequest)
-    if "GET /404.html HTTP/1.1" in Request:
-        showInfo(Server, Client)
-    Server.close()
+def sendMoveInfo(server,connector):
+    respone= "HTTP/1.1 301 Moved Permanently\r\nLocation: http://localhost:80/info.html"
+    printRespone(respone)
+    size=len(respone)
+    connector.send(bytes(respone,"utf-8"))
+    connector.close()
+    server.close()
 
 
-if __name__=="__main__": 
-    #while True:
-        Server = createServer("localhost",8080)
-        Client, Request = readHTTPRequest(Server)
-        print("----HTTP request: ")
-        print (Request)
-        showIndex(Server,Client,Request)
-        Server = createServer("localhost",8080)
-        print("----HTTP request: ")
-        print (Request)
-        Client, Request = readHTTPRequest(Server)
-        if checkPass (Request) == True:
-            moveToInfo(Client) #gui request truy cap info cho Server
-            showInfo(Server,Client)
-        else:  
-            moveTo404(Client)
-            show404(Server, Client)
-            
+def sendInfo(server,connector):
+    index = open ("info.html", "rb")
+    buffer=index.read()
+    respone="""HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Lenghth: %d\r\n\r\n"""%len(buffer)
+    printRespone(respone)
+    respone+=buffer.decode()    
+    connector.send(bytes(respone,"utf-8"))
+    index.close()
+    connector.close()
+    server.close()
+    server, r = createServer()
+    if r==1:
+        return 1
+    connector, address = server.accept()
+    if(connector):
+        request = connector.recv(1024).decode()
+        if "GET /lam.jpg HTTP/1.1" in request:
+            printRequest(request)
+            sendImg(server,connector,"lam.jpg")
+        else:
+            printRequest(request)
+            sendImg(server,connector,"han.jpg")
+    connector, address = server.accept()
+    if(connector):
+        request = connector.recv(1024).decode()
+        if "GET /han.jpg HTTP/1.1" in request:
+            printRequest(request)
+            sendImg(server,connector,"han.jpg")
+        else:
+            printRequest(request)
+            sendImg(server,connector,"lam.jpg")    
+    connector.close()
+    server.close()
+
+def sendImg(server,connector,img):
+    index = open (img, "rb")
+    buffer=index.read()
+    respone="""HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Lenghth: %d\r\n\r\n"""%len(buffer)
+    printRespone(respone)
+    respone =bytes(respone,"utf-8") +buffer
+    connector.send(respone)
+    index.close()
 
 
+def main():
+    server, r = createServer()
+    print("Server: \n")
+    print("IP: localhost\n")
+    print("Port: 80\n")
+    print("Waiting for Client.\n")
+    print("Please enter 'localhost' or 'localhost/index.html' into browser to connect to the server.\n")
+    connector, address = server.accept()
+    if connector:
+        #print("ye")
+        request = connector.recv(1024).decode()
+        printRequest(request)
+        while "GET / HTTP/1.1" not in request and  "GET /index.html HTTP/1.1" not in request:
+            print("Wrong addess, try again \n")
+            server.close()
+            connector.close()
+            server, r = createServer()
+            if r==1:
+                return 1
+            connector, address = server.accept()
+            if(connector):
+                request = connector.recv(1024).decode()
+        if "GET / HTTP/1.1" in request:
+            printRequest(request)
+            sendMoveIndex(server,connector)
+            server, r = createServer()
+            if r==1:
+                return 1
+            connector, address = server.accept()
+            if(connector):
+                while "GET /index.html HTTP/1.1" not in request:
+                    request = connector.recv(1024).decode()
+                printRequest(request)
+                sendIndex(server,connector)
+        else:
+            printRequest(request)
+            sendIndex(server,connector)
+        server, r = createServer()
+        if r==1:
+            return 1
+        connector, address = server.accept()
+        if(connector):
+            request = connector.recv(1024).decode()
+            printRequest(request)
+        if "POST" in request and  "username=admin&password=admin" in request:
+            sendMoveInfo(server,connector)
+            server, r = createServer()
+            if r==1:
+                return 1
+            connector, address = server.accept()
+            if(connector):
+                while "GET /info.html HTTP/1.1" not in request:
+                    request = connector.recv(1024).decode()
+                printRequest(request)
+                sendInfo(server,connector)
+            server, r = createServer()
+            if r==1:
+                return 1
+            connector, address = server.accept()
+            if(connector):
+                request = connector.recv(1024).decode()
+                if "GET /index.html HTTP/1.1" in request:
+                    printRequest(request)
+                    sendIndex(server,connector)
+                else:
+                   if "GET /files.html HTTP/1.1" in request:
+                        printRequest(request)
+                        sendFiles(server,connector)
+
+        else:
+            if "POST" not in request or  "username=admin&password=admin" not in request:
+                sendMove404(server,connector)
+                server, r = createServer()
+                if r==1:
+                    return 1
+                connector, address = server.accept()
+                if(connector):
+                    while "GET /404.html HTTP/1.1" not in request:
+                        request = connector.recv(1024).decode()
+                    printRequest(request)
+                    send404(server,connector)
+
+
+if __name__ == "__main__":
+    main()
