@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="icon" href="data:," />
+    <title>files</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial - scale=1">
+    <style>
+
+         header {
+            background-color: #ffffff;
+            padding: 30px;
+        }
+
+            header h1 {
+                text-align: center;
+                font-size: 40px;
+                color: black;
+                margin: 1.5px;
+            }
+            .btn-box button{
+            background-color : #31B0D5;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            margin: 10px 10px;
+            border-color: #46b8da;
+
+        }
+
+        @media screen and (min-width: 900px) {
+            .btn-box{
+                display: flex;
+                overflow: hidden;
+            }
+        }
+        
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Files</h1>
+    </header>
+    <a href="/download/han.jpg" download="">han.jpg</a>
+    <br />
+    <a href="/download/lam.jpg" download="">lam.jpg</a>
+    <br />
+    <a href="/download/text.pdf" download="">Text.pdf</a>
+    <br />
+    <a href="/download/video.mp4" download="">Video.mp4</a>
+    <br />
+    <a href="/download/sound.mp3" download="">Sound.mp3</a>
+    <br />
+    <div class="btn-box">
+        <button onclick="window.location.href='index.html'" , id="logout">
+            Log out
+        </button>
+    </div>
+</body>
+</html>
