@@ -171,10 +171,15 @@ def MenuDownload(server, connector, request):
     if "GET /download/lam.jpg HTTP/1.1" in request:
         file = open("download/lam.jpg","rb")
         response="HTTP/1.1 200 OK\r\nContent-Type: image/jpg\r\nTransfer-Encoding: chunked\r\n\r\n"
-    if "GET /download/Project_Socket_Programming_112020.pdf HTTP/1.1" in request:
-        file = open("download/Project_Socket_Programming_112020.pdf","rb")
+    if "GET /download/text.pdf HTTP/1.1" in request:
+        file = open("download/text.pdf","rb")
         response="HTTP/1.1 200 OK\r\nContent-Type: application/pdf\r\nTransfer-Encoding: chunked\r\n\r\n"
-
+    if "GET /download/video.mp4 HTTP/1.1" in request:
+        file = open("download/video.mp4","rb")
+        response="HTTP/1.1 200 OK\r\nContent-Type: image/jpg\r\nTransfer-Encoding: chunked\r\n\r\n"
+    if "GET /download/sound.mp3 HTTP/1.1" in request:
+        file = open("download/sound.mp3","rb")
+        response="HTTP/1.1 200 OK\r\nContent-Type: image/jpg\r\nTransfer-Encoding: chunked\r\n\r\n"
     printResponse(response)
     response=response.encode()
     CHUNK_SIZE=1000
@@ -187,8 +192,6 @@ def MenuDownload(server, connector, request):
     response+="0\r\n\r\n".encode()
     connector.send(response)
     file.close()
-    connector.close()
-    server.close()
 
 def main():
     server, r = createServer()
@@ -199,9 +202,7 @@ def main():
     print("Please enter 'localhost' or 'localhost/index.html' into browser to connect to the server.\n")
     connector, address = server.accept()
     if connector:
-        #print("ye")
         request = connector.recv(1024).decode()
-        printRequest(request)
         while "GET / HTTP/1.1" not in request and  "GET /index.html HTTP/1.1" not in request:
             print("Wrong addess, try again \n")
             server.close()
@@ -251,36 +252,30 @@ def main():
             connector, address = server.accept()
             if(connector):
                 request = connector.recv(1024).decode()
-                if "GET /favicon.ico HTTP/1.1" in request:
-                    sendFaviconIcon(server,connector)
+                if "GET /index.html HTTP/1.1" in request:
+                    printRequest(request)
+                    sendIndex(server,connector)
+                elif "GET /files.html HTTP/1.1" in request:
+                    printRequest(request)                            
+                    sendFiles(server,connector)
                     server, r = createServer()
                     if r==1:
                         return 1
                     connector, address = server.accept()
                     if(connector):
                         request = connector.recv(1024).decode()
-                        if "GET /index.html HTTP/1.1" in request:
-                            printRequest(request)
-                            sendIndex(server,connector)
-                        elif "GET /files.html HTTP/1.1" in request:
-                            printRequest(request)                            
-                            sendFiles(server,connector)
-                            server, r = createServer()
-                            if r==1:
-                                return 1
-                            connector, address = server.accept()
-                            if(connector):
-                                request = connector.recv(1024).decode()
-                                while not "GET /index.html HTTP/1.1" in request:
-                                    MenuDownload(server,connector,request)
-                                    server, r = createServer()
-                                    if r==1:
-                                        return 1
-                                    connector, address = server.accept()
-                                    if(connector):
-                                        request = connector.recv(1024).decode()
-                                printRequest(request)
-                                sendIndex(server,connector)
+                        while not "GET /index.html HTTP/1.1" in request:                      
+                            MenuDownload(server,connector,request)
+                            request = connector.recv(1024).decode()
+                        connector.close()
+                        server.close()
+                        server, r = createServer()
+                        if r==1:
+                            return 1
+                        connector, address = server.accept()
+                        if(connector):
+                            request = connector.recv(1024).decode()
+                        sendIndex(server,connector)
 
         else:
             if "POST" not in request or  "username=admin&password=admin" not in request:
