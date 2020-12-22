@@ -16,20 +16,20 @@ def printRequest(request):
     print("-------------HTTP request:")
     if "GET / HTTP/1.1" in request:
         print("GET / HTTP/1.1")
-    if "GET /index.html HTTP/1.1" in request:
-        print("GET /index.html HTTP/1.1")
-    if "GET /info.html HTTP/1.1" in request:
-        print("GET /info.html HTTP/1.1")
-    if "GET /404.html HTTP/1.1" in request:
-        print("GET /404.html HTTP/1.1")
-    if "GET /lam.jpg HTTP/1.1" in request:
-        print("GET /lam.jpg HTTP/1.1")
-    if "GET /han.jpg HTTP/1.1" in request:
-        print("GET /han.jpg HTTP/1.1")
+    if "GET /source/index.html HTTP/1.1" in request:
+        print("GET /source/index.html HTTP/1.1")
+    if "GET /source/info.html HTTP/1.1" in request:
+        print("GET /source/info.html HTTP/1.1")
+    if "GET /source/404.html HTTP/1.1" in request:
+        print("GET /source/404.html HTTP/1.1")
+    if "GET /source/lam.jpg HTTP/1.1" in request:
+        print("GET /source/lam.jpg HTTP/1.1")
+    if "GET /source/han.jpg HTTP/1.1" in request:
+        print("GET /source/han.jpg HTTP/1.1")
     if "POST / HTTP/1.1" in request:
         print("POST / HTTP/1.1")
-    if "GET /download/han.jpg HTTP/1.1" in request:
-        print("GET /download/han.jpg HTTP/1.1")
+    if "GET /source/download/han.jpg HTTP/1.1" in request:
+        print("GET /source/download/han.jpg HTTP/1.1")
 
 def printResponse(response):
     print("-------------HTTP response:")
@@ -53,7 +53,7 @@ def sendMoveIndex(server,connector):
     server.close()
 
 def sendIndex(server,connector):
-    index = open ("index.html", "rb")
+    index = open ("source/index.html", "rb")
     buffer=index.read()
     response="HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Lenghth: %d\r\n\r\n"%len(buffer)
     printResponse(response)
@@ -72,7 +72,7 @@ def sendMove404(server,connector):
     server.close()
 
 def send404(server,connector):
-    index = open ("404.html", "rb")
+    index = open ("source/404.html", "rb")
     buffer=index.read()
     response="HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\nContent-Lenghth: %d\r\n\r\n"%len(buffer)
     printResponse(response)
@@ -91,7 +91,7 @@ def sendMoveFiles(server,connector):
     server.close()
 
 def sendFiles(server,connector):
-    index = open ("files.html", "rb")
+    index = open ("source/files.html", "rb")
     buffer=index.read()
     response="""HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Lenghth: %d\r\n\r\n"""%len(buffer)
     printResponse(response)
@@ -111,7 +111,7 @@ def sendMoveInfo(server,connector):
     server.close()
 
 def sendInfo(server,connector):
-    index = open ("info.html", "rb")
+    index = open ("source/info.html", "rb")
     buffer=index.read()
     response="""HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Lenghth: %d\r\n\r\n"""%len(buffer)
     printResponse(response)
@@ -126,21 +126,21 @@ def sendInfo(server,connector):
     connector, address = server.accept()
     if(connector):
         request = connector.recv(1024).decode()
-        if "GET /lam.jpg HTTP/1.1" in request:
+        if "GET /source/lam.jpg HTTP/1.1" in request:
             printRequest(request)
-            sendImg(server,connector,"lam.jpg")
+            sendImg(server,connector,"source/lam.jpg")
         else:
             printRequest(request)
-            sendImg(server,connector,"han.jpg")
+            sendImg(server,connector,"source/han.jpg")
     connector, address = server.accept()
     if(connector):
         request = connector.recv(1024).decode()
-        if "GET /han.jpg HTTP/1.1" in request:
+        if "GET /source/han.jpg HTTP/1.1" in request:
             printRequest(request)
-            sendImg(server,connector,"han.jpg")
+            sendImg(server,connector,"source/han.jpg")
         else:
             printRequest(request)
-            sendImg(server,connector,"lam.jpg")    
+            sendImg(server,connector,"source/lam.jpg")    
     connector.close()
     server.close()
 
@@ -165,20 +165,20 @@ def sendFaviconIcon(server, connector):
     server.close()
 
 def MenuDownload(server, connector, request):
-    if "GET /download/han.jpg HTTP/1.1" in request:
-        file = open("download/han.jpg","rb")
+    if "GET /source/download/han.jpg HTTP/1.1" in request:
+        file = open("source/download/han.jpg","rb")
         response="HTTP/1.1 200 OK\r\nContent-Type: image/jpg\r\nTransfer-Encoding: chunked\r\n\r\n"
-    if "GET /download/lam.jpg HTTP/1.1" in request:
-        file = open("download/lam.jpg","rb")
+    if "GET /source/download/lam.jpg HTTP/1.1" in request:
+        file = open("source/download/lam.jpg","rb")
         response="HTTP/1.1 200 OK\r\nContent-Type: image/jpg\r\nTransfer-Encoding: chunked\r\n\r\n"
-    if "GET /download/text.pdf HTTP/1.1" in request:
-        file = open("download/text.pdf","rb")
+    if "GET /source/download/text.pdf HTTP/1.1" in request:
+        file = open("source/download/text.pdf","rb")
         response="HTTP/1.1 200 OK\r\nContent-Type: application/pdf\r\nTransfer-Encoding: chunked\r\n\r\n"
-    if "GET /download/video.mp4 HTTP/1.1" in request:
-        file = open("download/video.mp4","rb")
+    if "GET /source/download/video.mp4 HTTP/1.1" in request:
+        file = open("source/download/video.mp4","rb")
         response="HTTP/1.1 200 OK\r\nContent-Type: image/jpg\r\nTransfer-Encoding: chunked\r\n\r\n"
-    if "GET /download/sound.mp3 HTTP/1.1" in request:
-        file = open("download/sound.mp3","rb")
+    if "GET /source/download/sound.mp3 HTTP/1.1" in request:
+        file = open("source/download/sound.mp3","rb")
         response="HTTP/1.1 200 OK\r\nContent-Type: image/jpg\r\nTransfer-Encoding: chunked\r\n\r\n"
     printResponse(response)
     response=response.encode()
@@ -221,7 +221,7 @@ def main():
                 return 1
             connector, address = server.accept()
             if(connector):
-                while "GET /index.html HTTP/1.1" not in request:
+                while "GET /source/index.html HTTP/1.1" not in request:
                     request = connector.recv(1024).decode()
                 printRequest(request)
                 sendIndex(server,connector)
@@ -242,7 +242,7 @@ def main():
                 return 1
             connector, address = server.accept()
             if(connector):
-                while "GET /info.html HTTP/1.1" not in request:
+                while "GET /source/info.html HTTP/1.1" not in request:
                     request = connector.recv(1024).decode()
                 printRequest(request)
                 sendInfo(server,connector)
@@ -252,10 +252,10 @@ def main():
             connector, address = server.accept()
             if(connector):
                 request = connector.recv(1024).decode()
-                if "GET /index.html HTTP/1.1" in request:
+                if "GET /source/index.html HTTP/1.1" in request:
                     printRequest(request)
                     sendIndex(server,connector)
-                elif "GET /files.html HTTP/1.1" in request:
+                elif "GET /source/files.html HTTP/1.1" in request:
                     printRequest(request)                            
                     sendFiles(server,connector)
                     server, r = createServer()
@@ -264,7 +264,7 @@ def main():
                     connector, address = server.accept()
                     if(connector):
                         request = connector.recv(1024).decode()
-                        while not "GET /index.html HTTP/1.1" in request:                      
+                        while not "GET /source/index.html HTTP/1.1" in request:                      
                             MenuDownload(server,connector,request)
                             request = connector.recv(1024).decode()
                         connector.close()
@@ -285,7 +285,7 @@ def main():
                     return 1
                 connector, address = server.accept()
                 if(connector):
-                    while "GET /404.html HTTP/1.1" not in request:
+                    while "GET /source/404.html HTTP/1.1" not in request:
                         request = connector.recv(1024).decode()
                     printRequest(request)
                     send404(server,connector)
